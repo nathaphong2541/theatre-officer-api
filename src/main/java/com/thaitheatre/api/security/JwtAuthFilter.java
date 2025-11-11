@@ -40,6 +40,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 // ✅ swagger / error / actuator
                 || matcher.match("/swagger-ui.html", path)
                 || matcher.match("/swagger-ui/**", path)
+                || matcher.match("/public/**", path)
                 || matcher.match("/v3/api-docs/**", path)
                 || matcher.match("/error", path)
                 || matcher.match("/actuator/**", path);
@@ -82,7 +83,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
 
                 } catch (Exception e) {
-                    // invalid token → ไม่ตั้งค่า auth แล้วปล่อยไปให้ chain ทำงานต่อ (จะไปเจอ 401 ตาม rule)
+                    // invalid token → ไม่ตั้งค่า auth แล้วปล่อยไปให้ chain ทำงานต่อ (จะไปเจอ 401
+                    // ตาม rule)
                     // ถ้าต้องการ log ให้ debug: logger.debug("Invalid JWT", e);
                 }
             }
