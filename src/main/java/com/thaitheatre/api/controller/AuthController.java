@@ -43,7 +43,7 @@ public class AuthController {
     @Value("${app.frontend.base-url:http://localhost:4200}")
     private String frontendBase;
 
-    @Value("${app.cookie.secure:false}")       // prod → true
+    @Value("${app.cookie.secure:false}") // prod → true
     private boolean cookieSecure;
 
     @Value("${app.cookie.max-age-seconds:7200}") // default 2 ชั่วโมง
@@ -67,27 +67,27 @@ public class AuthController {
     // --- Login (เซ็ต JWT ลง HttpOnly Cookie)
     @PostMapping("/login")
     @Operation(summary = "Login (set HttpOnly cookie)")
+    // ถ้าจะให้ FE (เว็บ/มือถือ) เอาไปใช้ต่อ ก็ส่ง token กลับใน body ด้วย
     public ResponseEntity<?> login(@RequestBody LoginRequest rq, HttpServletResponse response) {
-        // ให้ service ตรวจสอบ credential และคืน AuthResponse (มี token และ user)
         AuthResponse authRes = auth.login(rq);
 
-        // สร้างคุกกี้เก็บ JWT
+        // ตั้งคุกกี้ JWT (อ่านไม่ได้จาก JS เพราะ HttpOnly)
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, authRes.accessToken())
                 .httpOnly(true)
-                .secure(cookieSecure) // true เมื่ออยู่หลัง HTTPS
-                .sameSite("Strict") // ถ้าต้องการ cross-site form POST อาจใช้ Lax
+                .secure(cookieSecure) // local ถ้าไม่ใช่ HTTPS ให้เป็น false
+                .sameSite("Lax") // ถ้าต้อง cross-site ให้ใช้ "None" + secure(true)
                 .path("/")
-                .maxAge(Duration.ofSeconds(cookieMaxAgeSeconds))
+                .maxAge(Duration.ofSeconds(authRes.expiresInSec()))
                 .build();
-
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        // ไม่จำเป็นต้องส่ง token กลับไป (ฝั่ง FE อ่านไม่ได้อยู่แล้ว)
-        // ส่งข้อมูล user/ข้อความกลับไปก็พอ
+        // ✅ ส่ง token กลับใน body ด้วย
         return ResponseEntity.ok(Map.of(
+                "accessToken", authRes.accessToken(),
+                "tokenType", authRes.tokenType(), // "Bearer"
+                "expiresInSec", authRes.expiresInSec(),
                 "user", authRes.user(),
-                "message", "Login successful"
-        ));
+                "message", "Login successful"));
     }
 
     @GetMapping("/me")
@@ -108,8 +108,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of(
                 "email", u.getEmail(),
                 "firstName", u.getFirstName(),
-                "lastName", u.getLastName()
-        ));
+                "lastName", u.getLastName()));
     }
 
     // --- Logout (ลบคุกกี้)

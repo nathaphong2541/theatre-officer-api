@@ -58,30 +58,23 @@ public class AuthService {
         }
 
         return new UserProfileDTO(
-                u.getId(), u.getFirstName(), u.getLastName(), u.getEmail(), u.getPolicyConfirmed()
-        );
+                u.getId(), u.getFirstName(), u.getLastName(), u.getEmail(), u.getPolicyConfirmed());
     }
 
     public AuthResponse login(LoginRequest rq) {
-        // 1) auth (จะโยน exception เองถ้ารหัสผ่านผิด)
         var auth = new UsernamePasswordAuthenticationToken(
                 rq.email().trim().toLowerCase(), rq.password());
         authManager.authenticate(auth);
 
-        // 2) ดึง user จาก DB เพื่อได้ id
-        var email = rq.email().trim().toLowerCase();
-        var user = repo.findByEmail(email)
+        var user = repo.findByEmail(rq.email().trim().toLowerCase())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
-        // 3) ออก token โดยใช้ userId เป็น subject (สำคัญ!)
-        String token = jwt.generate(String.valueOf(user.getId())); // ✅ sub = userId
-
-        System.out.println("Generated JWT Token: " + token);
-
+        String token = jwt.generate(String.valueOf(user.getId())); // ใช้ userId เป็น subject
         long expSec = jwt.getExpMillis() / 1000;
+
         return AuthResponse.bearer(token, expSec, new UserProfileDTO(
                 user.getId(), user.getFirstName(), user.getLastName(),
-                user.getEmail(), user.getPolicyConfirmed()
-        ));
+                user.getEmail(), user.getPolicyConfirmed()));
     }
+
 }
