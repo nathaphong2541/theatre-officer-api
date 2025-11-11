@@ -83,7 +83,7 @@ public class AuthController {
 
         // ✅ ส่ง token กลับใน body ด้วย
         return ResponseEntity.ok(Map.of(
-                "accessToken", authRes.accessToken(),
+                "token", authRes.accessToken(),
                 "tokenType", authRes.tokenType(), // "Bearer"
                 "expiresInSec", authRes.expiresInSec(),
                 "user", authRes.user(),

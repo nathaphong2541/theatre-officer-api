@@ -1,0 +1,13 @@
+package com.thaitheatre.api.repository.publice;
+
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.thaitheatre.api.model.entity.Position;
+
+public interface PositionPublicRepository extends JpaRepository<Position, Long> {
+    Page<Position> findByDelFlagAndRecordStatus(String delFlag, String recordStatus, Pageable pageable);
+
+    Page<Position> findByDelFlagAndRecordStatusAndDepartment_Id(String delFlag, String recordStatus, Long departmentId,
+            Pageable pageable);
+}
