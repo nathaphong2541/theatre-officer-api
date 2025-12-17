@@ -1,15 +1,20 @@
 package com.thaitheatre.api.service;
 
-import com.thaitheatre.api.common.ApiPage;
-import com.thaitheatre.api.model.dto.*;
-import com.thaitheatre.api.model.entity.Department;
-import com.thaitheatre.api.repository.DepartmentRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.Collectors;
+import com.thaitheatre.api.common.ApiPage;
+import com.thaitheatre.api.model.dto.DepartmentCreateUpdateDto;
+import com.thaitheatre.api.model.dto.DepartmentDto;
+import com.thaitheatre.api.model.entity.Department;
+import com.thaitheatre.api.repository.DepartmentRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -18,10 +23,22 @@ public class DepartmentService {
     private final DepartmentRepository repo;
 
     public ApiPage<DepartmentDto> list(int page, int size) {
-        Page<Department> p = repo.findAll(PageRequest.of(page, size, Sort.by("id").descending()));
+        Page<Department> p = repo.findAll(
+                PageRequest.of(page, size, Sort.by("id").descending())
+        );
+
+        var items = p.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
         return new ApiPage<>(
-                p.getContent().stream().map(this::toDto).collect(Collectors.toList()),
-                p.getTotalElements());
+                items,
+                p.getTotalElements(),
+                p.getNumber(),
+                p.getSize(),
+                p.getTotalPages()
+        );
     }
 
     public DepartmentDto get(Long id) {

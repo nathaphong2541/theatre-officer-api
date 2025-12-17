@@ -1,25 +1,44 @@
 package com.thaitheatre.api.service;
 
-import com.thaitheatre.api.common.ApiPage;
-import com.thaitheatre.api.model.dto.*;
-import com.thaitheatre.api.model.entity.UnionMembership;
-import com.thaitheatre.api.repository.UnionMembershipRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.Collectors;
+import com.thaitheatre.api.common.ApiPage;
+import com.thaitheatre.api.model.dto.UnionMembershipCreateUpdateDto;
+import com.thaitheatre.api.model.dto.UnionMembershipDto;
+import com.thaitheatre.api.model.entity.UnionMembership;
+import com.thaitheatre.api.repository.UnionMembershipRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class UnionMembershipService {
+
     private final UnionMembershipRepository repo;
 
     public ApiPage<UnionMembershipDto> list(int page, int size) {
-        Page<UnionMembership> p = repo.findAll(PageRequest.of(page, size, Sort.by("id").descending()));
-        return new ApiPage<>(p.getContent().stream().map(this::toDto).collect(Collectors.toList()),
-                p.getTotalElements());
+        Page<UnionMembership> p = repo.findAll(
+                PageRequest.of(page, size, Sort.by("id").descending())
+        );
+
+        var items = p.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        return new ApiPage<>(
+                items,
+                p.getTotalElements(),
+                p.getNumber(),
+                p.getSize(),
+                p.getTotalPages()
+        );
     }
 
     public UnionMembershipDto get(Long id) {

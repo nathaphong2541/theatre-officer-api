@@ -1,24 +1,44 @@
 package com.thaitheatre.api.service;
 
-import com.thaitheatre.api.common.ApiPage;
-import com.thaitheatre.api.model.entity.PersonalIdentity;
-import com.thaitheatre.api.model.dto.*;
-import com.thaitheatre.api.repository.PersonalIdentityRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.stream.Collectors;
+
+import com.thaitheatre.api.common.ApiPage;
+import com.thaitheatre.api.model.dto.PersonalIdentityCreateUpdateDto;
+import com.thaitheatre.api.model.dto.PersonalIdentityDto;
+import com.thaitheatre.api.model.entity.PersonalIdentity;
+import com.thaitheatre.api.repository.PersonalIdentityRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class PersonalIdentityService {
+
     private final PersonalIdentityRepository repo;
 
     public ApiPage<PersonalIdentityDto> list(int page, int size) {
-        Page<PersonalIdentity> p = repo.findAll(PageRequest.of(page, size, Sort.by("id").descending()));
-        return new ApiPage<>(p.getContent().stream().map(this::toDto).collect(Collectors.toList()),
-                p.getTotalElements());
+        Page<PersonalIdentity> p = repo.findAll(
+                PageRequest.of(page, size, Sort.by("id").descending())
+        );
+
+        var items = p.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        return new ApiPage<>(
+                items,
+                p.getTotalElements(),
+                p.getNumber(),
+                p.getSize(),
+                p.getTotalPages()
+        );
     }
 
     public PersonalIdentityDto get(Long id) {

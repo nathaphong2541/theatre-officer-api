@@ -1,24 +1,44 @@
 package com.thaitheatre.api.service;
 
-import com.thaitheatre.api.common.ApiPage;
-import com.thaitheatre.api.model.dto.*;
-import com.thaitheatre.api.model.entity.GenderIdentity;
-import com.thaitheatre.api.repository.GenderIdentityRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.stream.Collectors;
+
+import com.thaitheatre.api.common.ApiPage;
+import com.thaitheatre.api.model.dto.GenderIdentityCreateUpdateDto;
+import com.thaitheatre.api.model.dto.GenderIdentityDto;
+import com.thaitheatre.api.model.entity.GenderIdentity;
+import com.thaitheatre.api.repository.GenderIdentityRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class GenderIdentityService {
+
     private final GenderIdentityRepository repo;
 
     public ApiPage<GenderIdentityDto> list(int page, int size) {
-        Page<GenderIdentity> p = repo.findAll(PageRequest.of(page, size, Sort.by("id").descending()));
-        return new ApiPage<>(p.getContent().stream().map(this::toDto).collect(Collectors.toList()),
-                p.getTotalElements());
+        Page<GenderIdentity> p = repo.findAll(
+                PageRequest.of(page, size, Sort.by("id").descending())
+        );
+
+        var items = p.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        return new ApiPage<>(
+                items,
+                p.getTotalElements(),
+                p.getNumber(),
+                p.getSize(),
+                p.getTotalPages()
+        );
     }
 
     public GenderIdentityDto get(Long id) {

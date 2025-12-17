@@ -1,26 +1,45 @@
 package com.thaitheatre.api.service.publice;
 
 // Service
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
 import com.thaitheatre.api.common.ApiPage;
 import com.thaitheatre.api.model.entity.RacialIdentity;
 import com.thaitheatre.api.model.publice.RacialIdentityPublicDto;
 import com.thaitheatre.api.repository.publice.RacialIdentityPublicRepository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class RacialIdentityPublicService {
+
     private final RacialIdentityPublicRepository repo;
 
     public ApiPage<RacialIdentityPublicDto> list(int page, int size) {
-        Page<RacialIdentity> p = repo.findByDelFlagAndRecordStatus("N", "A",
-                PageRequest.of(page, size, Sort.by("id").descending()));
-        return new ApiPage<>(p.getContent().stream().map(this::toDto).collect(Collectors.toList()),
-                p.getTotalElements());
+        Page<RacialIdentity> p = repo.findByDelFlagAndRecordStatus(
+                "N",
+                "A",
+                PageRequest.of(page, size, Sort.by("id").descending())
+        );
+
+        var items = p.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        return new ApiPage<>(
+                items,
+                p.getTotalElements(),
+                p.getNumber(),
+                p.getSize(),
+                p.getTotalPages()
+        );
     }
 
     public RacialIdentityPublicDto get(Long id) {

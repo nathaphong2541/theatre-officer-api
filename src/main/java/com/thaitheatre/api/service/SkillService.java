@@ -1,17 +1,22 @@
 package com.thaitheatre.api.service;
 
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.thaitheatre.api.common.ApiPage;
-import com.thaitheatre.api.model.dto.*;
+import com.thaitheatre.api.model.dto.SkillCreateUpdateDto;
+import com.thaitheatre.api.model.dto.SkillDto;
 import com.thaitheatre.api.model.entity.Position;
 import com.thaitheatre.api.model.entity.Skill;
 import com.thaitheatre.api.repository.PositionRepository;
 import com.thaitheatre.api.repository.SkillRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +26,22 @@ public class SkillService {
     private final PositionRepository positionRepo;
 
     public ApiPage<SkillDto> list(int page, int size) {
-        Page<Skill> p = repo.findAll(PageRequest.of(page, size, Sort.by("id").descending()));
+        Page<Skill> p = repo.findAll(
+                PageRequest.of(page, size, Sort.by("id").descending())
+        );
+
+        var items = p.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
         return new ApiPage<>(
-                p.getContent().stream().map(this::toDto).collect(Collectors.toList()),
-                p.getTotalElements());
+                items,
+                p.getTotalElements(),
+                p.getNumber(),
+                p.getSize(),
+                p.getTotalPages()
+        );
     }
 
     public SkillDto get(Long id) {
@@ -65,7 +82,7 @@ public class SkillService {
     private SkillDto toDto(Skill e) {
         SkillDto dto = new SkillDto();
         dto.setId(e.getId());
-                dto.setNameTh(e.getNameTh());
+        dto.setNameTh(e.getNameTh());
         dto.setNameEn(e.getNameEn());
         dto.setDescription(e.getDescription());
         dto.setPositionId(e.getPosition().getId());
