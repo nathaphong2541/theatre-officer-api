@@ -90,4 +90,25 @@ public class PositionService {
         dto.setDepartmentNameEn(e.getDepartment().getNameEn());
         return dto;
     }
+
+    public ApiPage<PositionDto> listByDepartment(Long departmentId, int page, int size) {
+
+        Page<Position> p = repo.findByDepartment_Id(
+                departmentId,
+                PageRequest.of(page, size, Sort.by("id").descending())
+        );
+
+        var items = p.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        return new ApiPage<>(
+                items,
+                p.getTotalElements(),
+                p.getNumber(),
+                p.getSize(),
+                p.getTotalPages()
+        );
+    }
 }

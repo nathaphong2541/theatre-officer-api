@@ -24,8 +24,7 @@ public class DepartmentService {
 
     public ApiPage<DepartmentDto> list(int page, int size) {
         Page<Department> p = repo.findAll(
-                PageRequest.of(page, size, Sort.by("id").descending())
-        );
+                PageRequest.of(page, size, Sort.by("id").ascending()));
 
         var items = p.getContent()
                 .stream()
@@ -37,8 +36,7 @@ public class DepartmentService {
                 p.getTotalElements(),
                 p.getNumber(),
                 p.getSize(),
-                p.getTotalPages()
-        );
+                p.getTotalPages());
     }
 
     public DepartmentDto get(Long id) {
