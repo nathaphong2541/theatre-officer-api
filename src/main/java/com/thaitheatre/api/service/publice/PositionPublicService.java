@@ -38,14 +38,32 @@ public class PositionPublicService {
                 p.getTotalElements(),
                 p.getNumber(),
                 p.getSize(),
-                p.getTotalPages()
-        );
+                p.getTotalPages());
     }
 
     public PositionPublicDto get(Long id) {
         Position e = repo.findById(id).filter(x -> "N".equals(x.getDelFlag()) && "A".equals(x.getRecordStatus()))
                 .orElseThrow();
         return toDto(e);
+    }
+
+    public ApiPage<PositionPublicDto> listByDepartment(Long departmentId, int page, int size) {
+
+        Page<Position> p = repo.findByDepartment_Id(
+                departmentId,
+                PageRequest.of(page, size, Sort.by("id").descending()));
+
+        var items = p.getContent()
+                .stream()
+                .map(this::toDto) // toDto -> PositionPublicDto
+                .collect(Collectors.toList());
+
+        return new ApiPage<>(
+                items,
+                p.getTotalElements(),
+                p.getNumber(),
+                p.getSize(),
+                p.getTotalPages());
     }
 
     private PositionPublicDto toDto(Position e) {
