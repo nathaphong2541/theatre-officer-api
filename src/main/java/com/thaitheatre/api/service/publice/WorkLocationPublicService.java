@@ -24,8 +24,7 @@ public class WorkLocationPublicService {
         Page<WorkLocation> p = repo.findByDelFlagAndRecordStatus(
                 "N",
                 "A",
-                PageRequest.of(page, size, Sort.by("id").descending())
-        );
+                PageRequest.of(page, size, Sort.by("id").descending()));
 
         var items = p.getContent()
                 .stream()
@@ -37,8 +36,7 @@ public class WorkLocationPublicService {
                 p.getTotalElements(),
                 p.getNumber(),
                 p.getSize(),
-                p.getTotalPages()
-        );
+                p.getTotalPages());
     }
 
     public WorkLocationPublicDto get(Long id) {
@@ -55,4 +53,19 @@ public class WorkLocationPublicService {
         d.setDescription(e.getDescription());
         return d;
     }
+
+    public WorkLocationPublicDto create(WorkLocationPublicDto dto) {
+        WorkLocation e = new WorkLocation();
+        e.setNameTh(dto.getNameTh());
+        e.setNameEn(dto.getNameEn());
+        e.setDescription(dto.getDescription());
+
+        // ค่า default ตามมาตรฐานที่คุณใช้
+        e.setDelFlag("N");
+        e.setRecordStatus("A");
+
+        WorkLocation saved = repo.save(e);
+        return toDto(saved);
+    }
+
 }

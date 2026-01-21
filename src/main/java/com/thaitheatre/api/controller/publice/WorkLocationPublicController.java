@@ -23,4 +23,9 @@ public class WorkLocationPublicController {
     public WorkLocationPublicDto get(@PathVariable Long id) {
         return svc.get(id);
     }
+
+    @PostMapping
+    public WorkLocationPublicDto create(@RequestBody WorkLocationPublicDto dto) {
+        return svc.create(dto);
+    }
 }
