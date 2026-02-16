@@ -10,14 +10,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "personal_identity",
+@Table(name = "professions",
         indexes = {
-            @Index(name = "idx_personal_identity_name_th", columnList = "name_th"),
-            @Index(name = "idx_personal_identity_name_en", columnList = "name_en")
+            @Index(name = "idx_profession_name_th", columnList = "name_th"),
+            @Index(name = "idx_profession_name_en", columnList = "name_en")
         })
 @Getter
 @Setter
-public class PersonalIdentity extends BaseEntity {
+public class Profession extends BaseEntity {
 
     @Column(name = "name_th", nullable = false, length = 200)
     private String nameTh;
@@ -25,4 +25,5 @@ public class PersonalIdentity extends BaseEntity {
     private String nameEn;
     @Column(length = 500)
     private String description;
+
 }
